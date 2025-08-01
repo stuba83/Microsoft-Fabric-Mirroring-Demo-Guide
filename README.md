@@ -1,6 +1,10 @@
 # Microsoft Fabric Mirroring Demo Guide
 ## Azure SQL Database to Microsoft Fabric OneLake
 
+**Author:** [stuba83](https://github.com/stuba83)  
+**Repository:** [github.com/stuba83/Microsoft-Fabric-Mirroring-Demo-Guide](https://github.com/stuba83/Microsoft-Fabric-Mirroring-Demo-Guide)  
+**Last Updated:** August 2025
+
 ### 📋 Table of Contents
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)
@@ -1009,4 +1013,46 @@ All scripts from this demo are available in our GitHub repository:
 
 ---
 
+## About the Author
+
+**GitHub:** [@stuba83](https://github.com/stuba83)
+
+This comprehensive demo guide was created to showcase the complete implementation of Microsoft Fabric Mirroring from Azure SQL Database to Fabric OneLake. The guide includes real-world scenarios, limitations handling, and advanced analytics patterns.
+
+For questions, issues, or contributions to this demo guide, please:
+- 🐛 **Report issues:** [Create an issue](https://github.com/stuba83/fabric-mirroring-demo/issues)
+- 🤝 **Contribute:** [Submit a pull request](https://github.com/stuba83/fabric-mirroring-demo/pulls)
+- 💬 **Discuss:** [Start a discussion](https://github.com/stuba83/fabric-mirroring-demo/discussions)
+
+### Repository Structure
+```
+📁 fabric-mirroring-demo/
+├── README.md                     # This comprehensive guide
+├── 📁 scripts/
+│   ├── 📁 setup/
+│   │   ├── 01-azure-sql-setup.sql
+│   │   ├── 02-udt-fixes.sql
+│   │   └── 03-soft-delete-setup.sql
+│   ├── 📁 demo/
+│   │   ├── 01-insert-demo.sql
+│   │   ├── 02-update-demo.sql
+│   │   └── 03-delete-demo.sql
+│   ├── 📁 analytics/
+│   │   ├── fabric-views.sql
+│   │   └── powerbi-queries.sql
+│   └── 📁 troubleshooting/
+│       └── monitoring-queries.sql
+├── 📁 assets/
+│   └── 📁 images/
+│       ├── architecture-diagram.png
+│       └── demo-screenshots/
+└── LICENSE
+```
+
+**⭐ If this guide helped you, please star the repository!**
+
+---
+
 *This guide was created for demonstration purposes. Adapt configurations and security settings for your production requirements.*
+
+**Contact:** [@stuba83](https://github.com/stuba83) | **Repository:** [fabric-mirroring-demo](https://github.com/stuba83/fabric-mirroring-demo)
