@@ -33,26 +33,26 @@ WHERE name LIKE 'tr_%_SoftDelete';
 
 IF @TriggerCount < 4
 BEGIN
-    PRINT '⚠️  WARNING: Soft delete triggers not found!';
+    PRINT 'WARNING: Soft delete triggers not found!';
     PRINT '   Please run 03-soft-delete-setup.sql first to create the soft delete infrastructure.';
     PRINT '   This demo requires INSTEAD OF DELETE triggers to work properly.';
     RETURN;
 END
 ELSE
 BEGIN
-    PRINT '✅ Soft delete infrastructure verified (' + CAST(@TriggerCount AS VARCHAR) + ' triggers found)';
+    PRINT 'Soft delete infrastructure verified (' + CAST(@TriggerCount AS VARCHAR) + ' triggers found)';
 END
 
 -- Check if audit columns exist
 IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('SalesLT.Customer') AND name = 'IsDeleted')
 BEGIN
-    PRINT '⚠️  WARNING: Audit columns not found!';
+    PRINT 'WARNING: Audit columns not found!';
     PRINT '   Please run 03-soft-delete-setup.sql first to add IsDeleted, DeletedDate, DeletedBy columns.';
     RETURN;
 END
 ELSE
 BEGIN
-    PRINT '✅ Audit columns verified (IsDeleted, DeletedDate, DeletedBy)';
+    PRINT 'Audit columns verified (IsDeleted, DeletedDate, DeletedBy)';
 END
 
 PRINT '';
@@ -69,25 +69,25 @@ DECLARE @DemoProduct1 INT, @DemoProduct2 INT, @DemoProduct3 INT, @DemoProduct4 I
 DECLARE @DemoOrder1 INT, @DemoOrder2 INT;
 
 -- Find demo records by their unique identifiers
-SELECT @DemoProduct1 = ProductID FROM SalesLT.Product WHERE ProductNumber = 'SCP-2025-BK' AND IsDeleted = 0; -- Smart Cycling Computer
-SELECT @DemoProduct2 = ProductID FROM SalesLT.Product WHERE ProductNumber = 'FDB-ELITE-RD' AND IsDeleted = 0; -- Demo Bike
-SELECT @DemoProduct3 = ProductID FROM SalesLT.Product WHERE ProductNumber = 'HSB-750-BL' AND IsDeleted = 0; -- Water Bottle
-SELECT @DemoProduct4 = ProductID FROM SalesLT.Product WHERE ProductNumber = 'PMBS-2025-SL' AND IsDeleted = 0; -- Bike Stand
-SELECT @DemoProduct5 = ProductID FROM SalesLT.Product WHERE ProductNumber = 'UBLS-SET-WH' AND IsDeleted = 0; -- LED Lights
+SELECT TOP 1 @DemoProduct1 = ProductID FROM SalesLT.Product WHERE ProductNumber LIKE 'SCP-%' AND IsDeleted = 0 ORDER BY ProductID DESC;
+SELECT TOP 1 @DemoProduct2 = ProductID FROM SalesLT.Product WHERE ProductNumber LIKE 'FDB-%' AND IsDeleted = 0 ORDER BY ProductID DESC;
+SELECT TOP 1 @DemoProduct3 = ProductID FROM SalesLT.Product WHERE ProductNumber LIKE 'HSB-%' AND IsDeleted = 0 ORDER BY ProductID DESC;
+SELECT TOP 1 @DemoProduct4 = ProductID FROM SalesLT.Product WHERE ProductNumber LIKE 'PMBS-%' AND IsDeleted = 0 ORDER BY ProductID DESC;
+SELECT TOP 1 @DemoProduct5 = ProductID FROM SalesLT.Product WHERE ProductNumber LIKE 'UBLS-%' AND IsDeleted = 0 ORDER BY ProductID DESC;
 
 -- Find demo customers
-SELECT @DemoCustomer1 = CustomerID FROM SalesLT.Customer WHERE EmailAddress = 'alex.rodriguez@techcycle.com' AND IsDeleted = 0;
-SELECT @DemoCustomer2 = CustomerID FROM SalesLT.Customer WHERE EmailAddress = 'sarah.johnson@fitlifepro.com' AND IsDeleted = 0;
-SELECT @DemoCustomer3 = CustomerID FROM SalesLT.Customer WHERE EmailAddress = 'michael.chen@corpwellness.com' AND IsDeleted = 0;
+SELECT TOP 1 @DemoCustomer1 = CustomerID FROM SalesLT.Customer WHERE EmailAddress LIKE '%techcycle%' AND IsDeleted = 0;
+SELECT TOP 1 @DemoCustomer2 = CustomerID FROM SalesLT.Customer WHERE EmailAddress LIKE '%fitlife%' AND IsDeleted = 0;
+SELECT TOP 1 @DemoCustomer3 = CustomerID FROM SalesLT.Customer WHERE EmailAddress LIKE '%corpwellness%' AND IsDeleted = 0;
 
 -- Find demo orders
-SELECT @DemoOrder1 = SalesOrderID FROM SalesLT.SalesOrderHeader WHERE CustomerID = @DemoCustomer1 AND IsDeleted = 0;
-SELECT @DemoOrder2 = SalesOrderID FROM SalesLT.SalesOrderHeader WHERE CustomerID = @DemoCustomer2 AND IsDeleted = 0;
+SELECT TOP 1 @DemoOrder1 = SalesOrderID FROM SalesLT.SalesOrderHeader WHERE CustomerID = @DemoCustomer1 AND IsDeleted = 0;
+SELECT TOP 1 @DemoOrder2 = SalesOrderID FROM SalesLT.SalesOrderHeader WHERE CustomerID = @DemoCustomer2 AND IsDeleted = 0;
 
 -- If demo records not found, use any existing records for demonstration
 IF @DemoProduct1 IS NULL
 BEGIN
-    PRINT 'ℹ️  Demo records from insert demo not found, using existing records...';
+    PRINT 'Demo records from insert demo not found, using existing records...';
     
     -- Get any existing products for demonstration
     SELECT TOP 1 @DemoProduct1 = ProductID FROM SalesLT.Product WHERE IsDeleted = 0 ORDER BY ModifiedDate DESC;
@@ -160,7 +160,7 @@ PRINT '';
 -- Scenario: Smart Cycling Computer being discontinued due to new model
 IF @DemoProduct1 IS NOT NULL
 BEGIN
-    PRINT '📦 PRODUCT DISCONTINUATION: Smart Cycling Computer Pro 2025';
+    PRINT 'PRODUCT DISCONTINUATION: Smart Cycling Computer Pro 2025';
     PRINT 'Reason: New 2026 model launching - discontinuing 2025 version';
     PRINT '';
     
@@ -181,11 +181,11 @@ BEGIN
     FROM SalesLT.Product WHERE ProductID = @DemoProduct1;
     
     PRINT '';
-    PRINT '✅ Product discontinued but preserved for historical analytics!';
+    PRINT 'Product discontinued but preserved for historical analytics!';
 END
 
 PRINT '';
-PRINT '⏱️  Pausing 10 seconds - Check Fabric to see the soft delete as an UPDATE...';
+PRINT 'Pausing 10 seconds - Check Fabric to see the soft delete as an UPDATE...';
 WAITFOR DELAY '00:00:10';
 
 -- ========================================
@@ -200,7 +200,7 @@ PRINT '';
 -- Scenario: Customer requests account deletion but we need to keep sales history
 IF @DemoCustomer2 IS NOT NULL
 BEGIN
-    PRINT '👤 CUSTOMER ACCOUNT CLOSURE: Customer requested account deletion';
+    PRINT 'CUSTOMER ACCOUNT CLOSURE: Customer requested account deletion';
     PRINT 'Business Requirement: Preserve purchase history for analytics and compliance';
     PRINT '';
     
@@ -233,14 +233,14 @@ BEGIN
     FROM SalesLT.Customer WHERE CustomerID = @DemoCustomer2;
     
     PRINT '';
-    PRINT '✅ Customer account closed but purchase history preserved!';
+    PRINT 'Customer account closed but purchase history preserved!';
     
     -- Verify the customer's orders are still accessible for analytics
     PRINT '';
     PRINT 'Customer''s purchase history still available for analytics:';
     SELECT 
         soh.SalesOrderID, soh.OrderDate, 
-        CAST(soh.TotalDue AS DECIMAL(10,2)) as TotalDue,
+        CAST((soh.SubTotal + soh.TaxAmt + soh.Freight) AS DECIMAL(10,2)) as TotalDue,
         'Historical Order (Customer Deleted)' as Note
     FROM SalesLT.SalesOrderHeader soh
     WHERE soh.CustomerID = @DemoCustomer2
@@ -248,7 +248,7 @@ BEGIN
 END
 
 PRINT '';
-PRINT '⏱️  Pausing 10 seconds - Check Fabric for the customer soft delete...';
+PRINT 'Pausing 10 seconds - Check Fabric for the customer soft delete...';
 WAITFOR DELAY '00:00:10';
 
 -- ========================================
@@ -263,7 +263,7 @@ PRINT '';
 -- Scenario: Customer cancels order but we want to track cancellation analytics
 IF @DemoOrder1 IS NOT NULL
 BEGIN
-    PRINT '🛒 ORDER CANCELLATION: Customer cancelled order due to delivery delay';
+    PRINT 'ORDER CANCELLATION: Customer cancelled order due to delivery delay';
     PRINT 'Business Requirement: Track cancellation patterns for process improvement';
     PRINT '';
     
@@ -271,7 +271,7 @@ BEGIN
     PRINT 'Order before cancellation:';
     SELECT 
         SalesOrderID, CustomerID, OrderDate, Status,
-        CAST(TotalDue AS DECIMAL(10,2)) as TotalDue,
+        CAST((SubTotal + TaxAmt + Freight) AS DECIMAL(10,2)) as TotalDue,
         IsDeleted, DeletedDate, ModifiedDate
     FROM SalesLT.SalesOrderHeader WHERE SalesOrderID = @DemoOrder1;
     
@@ -296,12 +296,12 @@ BEGIN
     PRINT 'Order after "deletion" (actually soft deleted):';
     SELECT 
         SalesOrderID, CustomerID, OrderDate, Status,
-        CAST(TotalDue AS DECIMAL(10,2)) as TotalDue,
+        CAST((SubTotal + TaxAmt + Freight) AS DECIMAL(10,2)) as TotalDue,
         IsDeleted, DeletedDate, DeletedBy, ModifiedDate
     FROM SalesLT.SalesOrderHeader WHERE SalesOrderID = @DemoOrder1;
     
     PRINT '';
-    PRINT '✅ Order cancelled but preserved for cancellation analytics!';
+    PRINT 'Order cancelled but preserved for cancellation analytics!';
 END
 
 -- ========================================
@@ -316,7 +316,7 @@ PRINT '';
 -- Scenario: End of season - discontinue multiple seasonal items
 IF @DemoProduct3 IS NOT NULL AND @DemoProduct5 IS NOT NULL
 BEGIN
-    PRINT '🌟 SEASONAL CLEANUP: Discontinuing seasonal products for new inventory';
+    PRINT 'SEASONAL CLEANUP: Discontinuing seasonal products for new inventory';
     PRINT 'Products being discontinued: Water bottles and LED lights (seasonal items)';
     PRINT '';
     
@@ -348,11 +348,11 @@ BEGIN
     ORDER BY ProductID;
     
     PRINT '';
-    PRINT '✅ Bulk seasonal discontinuation completed - all data preserved!';
+    PRINT 'Bulk seasonal discontinuation completed - all data preserved!';
 END
 
 PRINT '';
-PRINT '⏱️  Pausing 10 seconds - Check Fabric for the bulk soft deletes...';
+PRINT 'Pausing 10 seconds - Check Fabric for the bulk soft deletes...';
 WAITFOR DELAY '00:00:10';
 
 -- ========================================
@@ -450,7 +450,7 @@ SELECT
         ELSE 'ACTIVE'
     END as AccountStatus,
     COUNT(soh.SalesOrderID) as TotalOrders,
-    ISNULL(SUM(soh.TotalDue), 0) as TotalRevenue,
+    ISNULL(SUM(soh.SubTotal + soh.TaxAmt + soh.Freight), 0) as TotalRevenue,
     MAX(soh.OrderDate) as LastOrderDate,
     c.DeletedDate as AccountClosedDate,
     CASE 
@@ -475,14 +475,14 @@ PRINT '';
 
 PRINT '-- Query 1: Verify soft deleted products in Fabric';
 PRINT 'SELECT ProductID, Name, ProductNumber, IsDeleted, DeletedDate, DeletedBy, ModifiedDate';
-PRINT 'FROM Product';
+PRINT 'FROM Product';  -- Or SalesLT.Product if schema is preserved
 PRINT 'WHERE IsDeleted = 1 AND DeletedDate >= DATEADD(HOUR, -2, GETDATE())';
 PRINT 'ORDER BY DeletedDate DESC;';
 PRINT '';
 
 PRINT '-- Query 2: Verify soft deleted customers in Fabric';
 PRINT 'SELECT CustomerID, FirstName, LastName, EmailAddress, IsDeleted, DeletedDate, DeletedBy';
-PRINT 'FROM Customer';
+PRINT 'FROM Customer';  -- Or SalesLT.Customer if schema is preserved
 PRINT 'WHERE IsDeleted = 1 AND DeletedDate >= DATEADD(HOUR, -2, GETDATE())';
 PRINT 'ORDER BY DeletedDate DESC;';
 PRINT '';
@@ -493,73 +493,14 @@ PRINT '    c.CustomerID,';
 PRINT '    c.FirstName + '' '' + c.LastName as CustomerName,';
 PRINT '    CASE WHEN c.IsDeleted = 1 THEN ''CLOSED'' ELSE ''ACTIVE'' END as AccountStatus,';
 PRINT '    COUNT(soh.SalesOrderID) as TotalOrders,';
-PRINT '    SUM(soh.TotalDue) as TotalRevenue,';
+PRINT '    SUM(soh.SubTotal + soh.TaxAmt + soh.Freight) as TotalRevenue,';
 PRINT '    MAX(soh.OrderDate) as LastOrderDate';
-PRINT 'FROM Customer c';
+PRINT 'FROM Customer c';  -- Or SalesLT.Customer if schema is preserved
 PRINT 'LEFT JOIN SalesOrderHeader soh ON c.CustomerID = soh.CustomerID';
-PRINT 'WHERE c.EmailAddress LIKE ''%techcycle%'' OR c.EmailAddress LIKE ''%fitlifepro%'' OR c.EmailAddress LIKE ''%corpwellness%''';
+PRINT 'WHERE c.EmailAddress LIKE ''%techcycle%'' OR c.EmailAddress LIKE ''%fitlife%'' OR c.EmailAddress LIKE ''%corpwellness%''';
 PRINT 'GROUP BY c.CustomerID, c.FirstName, c.LastName, c.IsDeleted';
 PRINT 'ORDER BY TotalRevenue DESC;';
 PRINT '';
-
-PRINT '-- Query 4: Product discontinuation impact analysis';
-PRINT 'SELECT ';
-PRINT '    p.ProductID,';
-PRINT '    p.Name,';
-PRINT '    p.ProductNumber,';
-PRINT '    CASE ';
-PRINT '        WHEN p.IsDeleted = 1 THEN ''DISCONTINUED''';
-PRINT '        ELSE ''ACTIVE''';
-PRINT '    END as ProductStatus,';
-PRINT '    p.ListPrice,';
-PRINT '    COUNT(sod.ProductID) as TimesSold,';
-PRINT '    SUM(sod.OrderQty) as TotalUnitsSold,';
-PRINT '    SUM(sod.LineTotal) as TotalRevenue,';
-PRINT '    p.DeletedDate as DiscontinuedDate';
-PRINT 'FROM Product p';
-PRINT 'LEFT JOIN SalesOrderDetail sod ON p.ProductID = sod.ProductID';
-PRINT 'WHERE p.ProductNumber LIKE ''SCP-%'' OR p.ProductNumber LIKE ''FDB-%'' OR p.ProductNumber LIKE ''HSB-%''';
-PRINT '   OR p.ProductNumber LIKE ''PMBS-%'' OR p.ProductNumber LIKE ''UBLS-%''';
-PRINT 'GROUP BY p.ProductID, p.Name, p.ProductNumber, p.IsDeleted, p.ListPrice, p.DeletedDate';
-PRINT 'ORDER BY TotalRevenue DESC;';
-PRINT '';
-
-PRINT '-- Query 5: Comprehensive deletion audit trail';
-PRINT 'SELECT ';
-PRINT '    ''Product'' as RecordType,';
-PRINT '    ProductID as RecordID,';
-PRINT '    Name as RecordName,';
-PRINT '    DeletedDate,';
-PRINT '    DeletedBy,';
-PRINT '    ModifiedDate';
-PRINT 'FROM Product';
-PRINT 'WHERE IsDeleted = 1';
-PRINT '';
-PRINT 'UNION ALL';
-PRINT '';
-PRINT 'SELECT ';
-PRINT '    ''Customer'' as RecordType,';
-PRINT '    CustomerID as RecordID,';
-PRINT '    FirstName + '' '' + LastName as RecordName,';
-PRINT '    DeletedDate,';
-PRINT '    DeletedBy,';
-PRINT '    ModifiedDate';
-PRINT 'FROM Customer';
-PRINT 'WHERE IsDeleted = 1';
-PRINT '';
-PRINT 'UNION ALL';
-PRINT '';
-PRINT 'SELECT ';
-PRINT '    ''SalesOrder'' as RecordType,';
-PRINT '    SalesOrderID as RecordID,';
-PRINT '    ''Order #'' + CAST(SalesOrderID AS VARCHAR) as RecordName,';
-PRINT '    DeletedDate,';
-PRINT '    DeletedBy,';
-PRINT '    ModifiedDate';
-PRINT 'FROM SalesOrderHeader';
-PRINT 'WHERE IsDeleted = 1';
-PRINT '';
-PRINT 'ORDER BY DeletedDate DESC;';
 
 -- ========================================
 -- DEMO STEP 9: BUSINESS VALUE DEMONSTRATION
@@ -577,7 +518,7 @@ DECLARE @PreservedCustomers INT = 0;
 DECLARE @PreservedProducts INT = 0;
 
 -- Calculate preserved revenue from soft deleted customers' historical orders
-SELECT @PreservedRevenue = ISNULL(SUM(soh.TotalDue), 0),
+SELECT @PreservedRevenue = ISNULL(SUM(soh.SubTotal + soh.TaxAmt + soh.Freight), 0),
        @PreservedOrders = COUNT(soh.SalesOrderID)
 FROM SalesLT.SalesOrderHeader soh
 JOIN SalesLT.Customer c ON soh.CustomerID = c.CustomerID
@@ -592,30 +533,30 @@ SELECT @PreservedProducts = COUNT(*)
 FROM SalesLT.Product 
 WHERE IsDeleted = 1 AND DeletedDate >= DATEADD(HOUR, -1, GETDATE());
 
-PRINT '💰 BUSINESS VALUE OF SOFT DELETE STRATEGY:';
+PRINT 'BUSINESS VALUE OF SOFT DELETE STRATEGY:';
 PRINT '';
-PRINT '📊 Data Preservation Metrics:';
-PRINT '   💳 Historical Revenue Preserved:  + CAST(@PreservedRevenue AS VARCHAR);
-PRINT '   🛒 Historical Orders Preserved: ' + CAST(@PreservedOrders AS VARCHAR);
-PRINT '   👥 Customer Records Preserved: ' + CAST(@PreservedCustomers AS VARCHAR);
-PRINT '   📦 Product Records Preserved: ' + CAST(@PreservedProducts AS VARCHAR);
-PRINT '';
-
-PRINT '🎯 Business Benefits Achieved:';
-PRINT '   📈 Complete customer lifetime value analysis possible';
-PRINT '   🔍 Product performance tracking including discontinued items';
-PRINT '   📊 Churn analysis and customer retention insights';
-PRINT '   🏛️  Regulatory compliance and audit trail maintenance';
-PRINT '   💼 Data-driven business decisions based on complete history';
-PRINT '   🔄 Ability to "undelete" records if needed';
+PRINT 'Data Preservation Metrics:';
+PRINT '   * Historical Revenue Preserved: $' + CAST(@PreservedRevenue AS VARCHAR);
+PRINT '   * Historical Orders Preserved: ' + CAST(@PreservedOrders AS VARCHAR);
+PRINT '   * Customer Records Preserved: ' + CAST(@PreservedCustomers AS VARCHAR);
+PRINT '   * Product Records Preserved: ' + CAST(@PreservedProducts AS VARCHAR);
 PRINT '';
 
-PRINT '⚠️  What would be lost with hard deletes:';
-PRINT '   ❌ Customer purchase history and lifetime value';
-PRINT '   ❌ Product sales performance data';
-PRINT '   ❌ Revenue attribution and trend analysis';
-PRINT '   ❌ Compliance and audit capabilities';
-PRINT '   ❌ Customer win-back opportunities';
+PRINT 'Business Benefits Achieved:';
+PRINT '   * Complete customer lifetime value analysis possible';
+PRINT '   * Product performance tracking including discontinued items';
+PRINT '   * Churn analysis and customer retention insights';
+PRINT '   * Regulatory compliance and audit trail maintenance';
+PRINT '   * Data-driven business decisions based on complete history';
+PRINT '   * Ability to "undelete" records if needed';
+PRINT '';
+
+PRINT 'What would be lost with hard deletes:';
+PRINT '   * Customer purchase history and lifetime value';
+PRINT '   * Product sales performance data';
+PRINT '   * Revenue attribution and trend analysis';
+PRINT '   * Compliance and audit capabilities';
+PRINT '   * Customer win-back opportunities';
 
 -- ========================================
 -- DEMO STEP 10: RECOVERY DEMONSTRATION
@@ -629,7 +570,7 @@ PRINT '';
 -- Scenario: Customer wants to reactivate their account
 IF @DemoCustomer2 IS NOT NULL
 BEGIN
-    PRINT '🔄 CUSTOMER REACTIVATION: Previously closed customer wants to return';
+    PRINT 'CUSTOMER REACTIVATION: Previously closed customer wants to return';
     PRINT 'Demonstrating the ability to "undelete" soft deleted records...';
     PRINT '';
     
@@ -655,7 +596,7 @@ BEGIN
     FROM SalesLT.Customer WHERE CustomerID = @DemoCustomer2;
     
     PRINT '';
-    PRINT '✅ Customer successfully reactivated with full history intact!';
+    PRINT 'Customer successfully reactivated with full history intact!';
     PRINT 'All previous orders and purchase history immediately available again.';
     
     -- Show that historical orders are still linked
@@ -663,7 +604,7 @@ BEGIN
     PRINT 'Customer''s historical orders (never lost):';
     SELECT 
         SalesOrderID, OrderDate, 
-        CAST(TotalDue AS DECIMAL(10,2)) as TotalDue,
+        CAST((SubTotal + TaxAmt + Freight) AS DECIMAL(10,2)) as TotalDue,
         'Historical order preserved during account closure' as Note
     FROM SalesLT.SalesOrderHeader 
     WHERE CustomerID = @DemoCustomer2
@@ -671,7 +612,7 @@ BEGIN
 END
 
 PRINT '';
-PRINT '⏱️  Pausing 10 seconds - Check Fabric for the customer reactivation...';
+PRINT 'Pausing 10 seconds - Check Fabric for the customer reactivation...';
 WAITFOR DELAY '00:00:10';
 
 -- ========================================
@@ -681,42 +622,42 @@ WAITFOR DELAY '00:00:10';
 PRINT '';
 PRINT '=== SOFT DELETE DEMO COMPLETED SUCCESSFULLY ===';
 PRINT '';
-PRINT '✅ What was demonstrated:';
-PRINT '   🗑️  DELETE operations converted to soft deletes (UPDATEs)';
-PRINT '   📊 Complete data preservation for historical analytics';
-PRINT '   ⚡ Real-time replication of soft deletes to Fabric as UPDATEs';
-PRINT '   💼 Real business scenarios: discontinuation, account closure, cancellation';
-PRINT '   📈 Advanced analytics using both active and "deleted" records';
-PRINT '   🔄 Recovery capabilities (undelete functionality)';
-PRINT '   🏛️  Audit trail and compliance benefits';
+PRINT 'What was demonstrated:';
+PRINT '   * DELETE operations converted to soft deletes (UPDATEs)';
+PRINT '   * Complete data preservation for historical analytics';
+PRINT '   * Real-time replication of soft deletes to Fabric as UPDATEs';
+PRINT '   * Real business scenarios: discontinuation, account closure, cancellation';
+PRINT '   * Advanced analytics using both active and "deleted" records';
+PRINT '   * Recovery capabilities (undelete functionality)';
+PRINT '   * Audit trail and compliance benefits';
 PRINT '';
 
-PRINT '🎯 Soft Delete Scenarios Covered:';
-PRINT '   📦 Product discontinuation (preserve sales history)';
-PRINT '   👤 Customer account closure (preserve purchase history)';
-PRINT '   🛒 Order cancellation (preserve pipeline analytics)';
-PRINT '   🌟 Bulk seasonal cleanup (preserve performance data)';
-PRINT '   🔄 Account reactivation (demonstrate reversibility)';
+PRINT 'Soft Delete Scenarios Covered:';
+PRINT '   * Product discontinuation (preserve sales history)';
+PRINT '   * Customer account closure (preserve purchase history)';
+PRINT '   * Order cancellation (preserve pipeline analytics)';
+PRINT '   * Bulk seasonal cleanup (preserve performance data)';
+PRINT '   * Account reactivation (demonstrate reversibility)';
 PRINT '';
 
-PRINT '💰 Business Value Demonstrated:';
-PRINT '   📈 Complete customer lifetime value analysis';
-PRINT '   🔍 Product performance including discontinued items';
-PRINT '   📊 Churn analysis and retention insights';
-PRINT '   🏛️  Regulatory compliance and audit capabilities';
-PRINT '   💼 Data-driven decisions based on complete history';
-PRINT '   🔄 Flexibility to recover "deleted" data';
+PRINT 'Business Value Demonstrated:';
+PRINT '   * Complete customer lifetime value analysis';
+PRINT '   * Product performance including discontinued items';
+PRINT '   * Churn analysis and retention insights';
+PRINT '   * Regulatory compliance and audit capabilities';
+PRINT '   * Data-driven decisions based on complete history';
+PRINT '   * Flexibility to recover "deleted" data';
 PRINT '';
 
-PRINT '🔧 Technical Benefits Shown:';
-PRINT '   ⚡ Zero data loss in analytical systems';
-PRINT '   🔄 Seamless integration with Fabric Mirroring';
-PRINT '   📊 Rich historical datasets for machine learning';
-PRINT '   🎯 Granular audit trails and data lineage';
-PRINT '   🛡️  Protection against accidental data loss';
+PRINT 'Technical Benefits Shown:';
+PRINT '   * Zero data loss in analytical systems';
+PRINT '   * Seamless integration with Fabric Mirroring';
+PRINT '   * Rich historical datasets for machine learning';
+PRINT '   * Granular audit trails and data lineage';
+PRINT '   * Protection against accidental data loss';
 PRINT '';
 
-PRINT '➡️  Next steps:';
+PRINT 'Next steps:';
 PRINT '   1. Explore advanced historical analytics in Fabric using fabric-views.sql';
 PRINT '   2. Build Power BI reports leveraging both active and historical data';
 PRINT '   3. Implement alerting on deletion patterns and trends';
@@ -724,19 +665,19 @@ PRINT '   4. Create customer win-back campaigns using soft delete data';
 PRINT '   5. Develop compliance reports using complete audit trails';
 PRINT '';
 
-PRINT '📊 Advanced Analytics Opportunities:';
-PRINT '   • Customer churn prediction models';
-PRINT '   • Product lifecycle optimization';
-PRINT '   • Revenue recovery analysis';
-PRINT '   • Seasonal demand forecasting';
-PRINT '   • Regulatory reporting and compliance';
+PRINT 'Advanced Analytics Opportunities:';
+PRINT '   * Customer churn prediction models';
+PRINT '   * Product lifecycle optimization';
+PRINT '   * Revenue recovery analysis';
+PRINT '   * Seasonal demand forecasting';
+PRINT '   * Regulatory reporting and compliance';
 PRINT '';
 
-PRINT '📁 Repository: https://github.com/stuba83/fabric-mirroring-demo';
-PRINT '⭐ Star the repo if this demo was helpful!';
-PRINT '🐛 Issues or questions? https://github.com/stuba83/fabric-mirroring-demo/issues';
+PRINT 'Repository: https://github.com/stuba83/fabric-mirroring-demo';
+PRINT 'Star the repo if this demo was helpful!';
+PRINT 'Issues or questions? https://github.com/stuba83/fabric-mirroring-demo/issues';
 PRINT '';
-PRINT '🎉 CONGRATULATIONS! You''ve completed the full CRUD demonstration';
+PRINT 'CONGRATULATIONS! You''ve completed the full CRUD demonstration';
 PRINT '   showing INSERT, UPDATE, and soft DELETE operations with real-time';
 PRINT '   replication to Microsoft Fabric OneLake. Your data is now ready';
 PRINT '   for advanced analytics, machine learning, and business intelligence!';

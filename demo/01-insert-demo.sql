@@ -1,4 +1,10 @@
--- ========================================
+PRINT '';
+PRINT 'FABRIC COMPATIBILITY NOTES:';
+PRINT 'The following columns are COMPUTED and do NOT replicate to Fabric:';
+PRINT '  - SalesOrderHeader.TotalDue (computed as SubTotal + TaxAmt + Freight)';
+PRINT '  - SalesOrderHeader.SalesOrderNumber (computed)';
+PRINT 'In Fabric queries, calculate TotalDue manually: SubTotal + TaxAmt + Freight';
+PRINT '';-- ========================================
 -- Microsoft Fabric Mirroring Demo
 -- File: 01-insert-demo.sql
 -- Author: stuba83 (https://github.com/stuba83)
@@ -60,7 +66,7 @@ VALUES (
 );
 
 DECLARE @Customer1ID INT = SCOPE_IDENTITY();
-PRINT '✅ Customer 1 created - Alex Rodriguez (ID: ' + CAST(@Customer1ID AS VARCHAR) + ')';
+PRINT 'Customer 1 created - Alex Rodriguez (ID: ' + CAST(@Customer1ID AS VARCHAR) + ')';
 
 -- Customer 2: Fitness enthusiast
 INSERT INTO SalesLT.Customer (
@@ -75,7 +81,7 @@ VALUES (
 );
 
 DECLARE @Customer2ID INT = SCOPE_IDENTITY();
-PRINT '✅ Customer 2 created - Sarah Johnson (ID: ' + CAST(@Customer2ID AS VARCHAR) + ')';
+PRINT 'Customer 2 created - Sarah Johnson (ID: ' + CAST(@Customer2ID AS VARCHAR) + ')';
 
 -- Customer 3: Corporate buyer
 INSERT INTO SalesLT.Customer (
@@ -90,12 +96,12 @@ VALUES (
 );
 
 DECLARE @Customer3ID INT = SCOPE_IDENTITY();
-PRINT '✅ Customer 3 created - Michael Chen (ID: ' + CAST(@Customer3ID AS VARCHAR) + ')';
+PRINT 'Customer 3 created - Michael Chen (ID: ' + CAST(@Customer3ID AS VARCHAR) + ')';
 
 -- Wait for replication demonstration
 PRINT '';
-PRINT '⏱️  Pausing 10 seconds for Fabric mirroring demonstration...';
-PRINT '   👀 Check your Fabric SQL Analytics Endpoint now!';
+PRINT 'Pausing 10 seconds for Fabric mirroring demonstration...';
+PRINT 'Check your Fabric SQL Analytics Endpoint now!';
 WAITFOR DELAY '00:00:10';
 
 -- ========================================
@@ -107,15 +113,20 @@ PRINT '--- DEMO Step 2: Inserting New Products ---';
 PRINT 'Creating innovative products for 2025 catalog...';
 PRINT '';
 
--- Product 1: High-tech cycling computer
+-- Declare product ID variables first
+DECLARE @Product1ID INT, @Product2ID INT, @Product3ID INT, @Product4ID INT, @Product5ID INT;
+
+-- Product 1: High-tech cycling computer (with unique timestamp)
+DECLARE @UniqueTimestamp VARCHAR(20) = REPLACE(REPLACE(REPLACE(CONVERT(VARCHAR, GETDATE(), 120), '-', ''), ' ', ''), ':', '');
+
 INSERT INTO SalesLT.Product (
     Name, ProductNumber, Color, StandardCost, ListPrice, 
     Size, Weight, ProductCategoryID, ProductModelID, 
     SellStartDate, ModifiedDate
 )
 VALUES (
-    'Smart Cycling Computer Pro 2025', 
-    'SCP-2025-BK', 
+    'Smart Cycling Computer Pro ' + @UniqueTimestamp, 
+    'SCP-' + @UniqueTimestamp, 
     'Black', 
     89.50, 
     199.99, 
@@ -127,8 +138,8 @@ VALUES (
     GETDATE()
 );
 
-DECLARE @Product1ID INT = SCOPE_IDENTITY();
-PRINT '✅ Product 1 created - Smart Cycling Computer Pro 2025 (ID: ' + CAST(@Product1ID AS VARCHAR) + ')';
+SET @Product1ID = SCOPE_IDENTITY();
+PRINT 'Product 1 created - Smart Cycling Computer Pro ' + @UniqueTimestamp + ' (ID: ' + CAST(@Product1ID AS VARCHAR) + ')';
 
 -- Product 2: Premium demo bike
 INSERT INTO SalesLT.Product (
@@ -137,8 +148,8 @@ INSERT INTO SalesLT.Product (
     SellStartDate, ModifiedDate
 )
 VALUES (
-    'Fabric Demo Bike Elite Edition', 
-    'FDB-ELITE-RD', 
+    'Fabric Demo Bike Elite ' + @UniqueTimestamp, 
+    'FDB-' + @UniqueTimestamp, 
     'Red', 
     450.75, 
     899.99, 
@@ -150,18 +161,18 @@ VALUES (
     GETDATE()
 );
 
-DECLARE @Product2ID INT = SCOPE_IDENTITY();
-PRINT '✅ Product 2 created - Fabric Demo Bike Elite Edition (ID: ' + CAST(@Product2ID AS VARCHAR) + ')';
+SET @Product2ID = SCOPE_IDENTITY();
+PRINT 'Product 2 created - Fabric Demo Bike Elite ' + @UniqueTimestamp + ' (ID: ' + CAST(@Product2ID AS VARCHAR) + ')';
 
--- Product 3: Smart water bottle
+-- Product 3: Smart water bottle (Size field limited to 5 chars)
 INSERT INTO SalesLT.Product (
     Name, ProductNumber, Color, StandardCost, ListPrice, 
     Size, Weight, ProductCategoryID, ProductModelID, 
     SellStartDate, ModifiedDate
 )
 VALUES (
-    'Hydro-Smart Water Bottle 750ml', 
-    'HSB-750-BL', 
+    'Hydro-Smart Water Bottle ' + @UniqueTimestamp, 
+    'HSB-' + @UniqueTimestamp, 
     'Blue', 
     12.30, 
     34.99, 
@@ -173,22 +184,22 @@ VALUES (
     GETDATE()
 );
 
-DECLARE @Product3ID INT = SCOPE_IDENTITY();
-PRINT '✅ Product 3 created - Hydro-Smart Water Bottle 750ml (ID: ' + CAST(@Product3ID AS VARCHAR) + ')';
+SET @Product3ID = SCOPE_IDENTITY();
+PRINT 'Product 3 created - Hydro-Smart Water Bottle ' + @UniqueTimestamp + ' (ID: ' + CAST(@Product3ID AS VARCHAR) + ')';
 
--- Product 4: Professional bike stand
+-- Product 4: Professional bike stand (Size truncated to fit field)
 INSERT INTO SalesLT.Product (
     Name, ProductNumber, Color, StandardCost, ListPrice, 
     Size, Weight, ProductCategoryID, ProductModelID, 
     SellStartDate, ModifiedDate
 )
 VALUES (
-    'Pro Maintenance Bike Stand 2025', 
-    'PMBS-2025-SL', 
+    'Pro Maintenance Bike Stand ' + @UniqueTimestamp, 
+    'PMBS-' + @UniqueTimestamp, 
     'Silver', 
     75.25, 
     149.99, 
-    'Universal', 
+    'Univ',  -- Truncated to fit Size field (5 chars max)
     8.2, 
     31,     -- Bike Stands category
     122,    -- All-Purpose Bike Stand model
@@ -196,22 +207,22 @@ VALUES (
     GETDATE()
 );
 
-DECLARE @Product4ID INT = SCOPE_IDENTITY();
-PRINT '✅ Product 4 created - Pro Maintenance Bike Stand 2025 (ID: ' + CAST(@Product4ID AS VARCHAR) + ')';
+SET @Product4ID = SCOPE_IDENTITY();
+PRINT 'Product 4 created - Pro Maintenance Bike Stand ' + @UniqueTimestamp + ' (ID: ' + CAST(@Product4ID AS VARCHAR) + ')';
 
--- Product 5: LED safety light set
+-- Product 5: LED safety light set (Size truncated to fit field)
 INSERT INTO SalesLT.Product (
     Name, ProductNumber, Color, StandardCost, ListPrice, 
     Size, Weight, ProductCategoryID, ProductModelID, 
     SellStartDate, ModifiedDate
 )
 VALUES (
-    'UltraBright LED Safety Light Set', 
-    'UBLS-SET-WH', 
+    'UltraBright LED Safety Light ' + @UniqueTimestamp, 
+    'UBLS-' + @UniqueTimestamp, 
     'White', 
     18.75, 
     49.99, 
-    'Set of 4', 
+    'Set4',  -- Truncated to fit Size field (5 chars max)
     0.8, 
     4,      -- Accessories category
     115,    -- Cable Lock model (reusing existing model)
@@ -219,13 +230,13 @@ VALUES (
     GETDATE()
 );
 
-DECLARE @Product5ID INT = SCOPE_IDENTITY();
-PRINT '✅ Product 5 created - UltraBright LED Safety Light Set (ID: ' + CAST(@Product5ID AS VARCHAR) + ')';
+SET @Product5ID = SCOPE_IDENTITY();
+PRINT 'Product 5 created - UltraBright LED Safety Light ' + @UniqueTimestamp + ' (ID: ' + CAST(@Product5ID AS VARCHAR) + ')';
 
 -- Wait for replication demonstration
 PRINT '';
-PRINT '⏱️  Pausing 15 seconds for Fabric mirroring demonstration...';
-PRINT '   👀 Check your Fabric SQL Analytics Endpoint for the new products!';
+PRINT 'Pausing 15 seconds for Fabric mirroring demonstration...';
+PRINT 'Check your Fabric SQL Analytics Endpoint for the new products!';
 WAITFOR DELAY '00:00:15';
 
 -- ========================================
@@ -250,17 +261,27 @@ VALUES (
 );
 
 DECLARE @SalesOrder1ID INT = SCOPE_IDENTITY();
-PRINT '✅ Sales Order 1 created for Alex Rodriguez (Order ID: ' + CAST(@SalesOrder1ID AS VARCHAR) + ')';
+IF @SalesOrder1ID IS NOT NULL
+    PRINT 'Sales Order 1 created for Alex Rodriguez (Order ID: ' + CAST(@SalesOrder1ID AS VARCHAR) + ')';
+ELSE
+    PRINT 'ERROR: Sales Order 1 creation failed for Alex Rodriguez';
 
 -- Add order details for Sales Order 1
-INSERT INTO SalesLT.SalesOrderDetail (
-    SalesOrderID, ProductID, OrderQty, UnitPrice, UnitPriceDiscount, ModifiedDate
-)
-VALUES 
-    (@SalesOrder1ID, @Product1ID, 1, 199.99, 0.00, GETDATE()),  -- Smart Cycling Computer
-    (@SalesOrder1ID, @Product5ID, 1, 49.99, 0.00, GETDATE());   -- LED Light Set
+IF @SalesOrder1ID IS NOT NULL AND @Product1ID IS NOT NULL AND @Product5ID IS NOT NULL
+BEGIN
+    INSERT INTO SalesLT.SalesOrderDetail (
+        SalesOrderID, ProductID, OrderQty, UnitPrice, UnitPriceDiscount, ModifiedDate
+    )
+    VALUES 
+        (@SalesOrder1ID, @Product1ID, 1, 199.99, 0.00, GETDATE()),  -- Smart Cycling Computer
+        (@SalesOrder1ID, @Product5ID, 1, 49.99, 0.00, GETDATE());   -- LED Light Set
 
-PRINT '  - Added cycling computer and LED lights to order';
+    PRINT '  - Added cycling computer and LED lights to order';
+END
+ELSE
+BEGIN
+    PRINT '  - Warning: Could not add order details due to failed product creation';
+END
 
 -- Sales Order 2: Sarah Johnson buys demo bike
 INSERT INTO SalesLT.SalesOrderHeader (
@@ -275,16 +296,26 @@ VALUES (
 );
 
 DECLARE @SalesOrder2ID INT = SCOPE_IDENTITY();
-PRINT '✅ Sales Order 2 created for Sarah Johnson (Order ID: ' + CAST(@SalesOrder2ID AS VARCHAR) + ')';
+IF @SalesOrder2ID IS NOT NULL
+    PRINT 'Sales Order 2 created for Sarah Johnson (Order ID: ' + CAST(@SalesOrder2ID AS VARCHAR) + ')';
+ELSE
+    PRINT 'ERROR: Sales Order 2 creation failed for Sarah Johnson';
 
 -- Add order details for Sales Order 2
-INSERT INTO SalesLT.SalesOrderDetail (
-    SalesOrderID, ProductID, OrderQty, UnitPrice, UnitPriceDiscount, ModifiedDate
-)
-VALUES 
-    (@SalesOrder2ID, @Product2ID, 1, 899.99, 0.00, GETDATE());  -- Demo Bike
+IF @SalesOrder2ID IS NOT NULL AND @Product2ID IS NOT NULL
+BEGIN
+    INSERT INTO SalesLT.SalesOrderDetail (
+        SalesOrderID, ProductID, OrderQty, UnitPrice, UnitPriceDiscount, ModifiedDate
+    )
+    VALUES 
+        (@SalesOrder2ID, @Product2ID, 1, 899.99, 0.00, GETDATE());  -- Demo Bike
 
-PRINT '  - Added Fabric Demo Bike Elite Edition to order';
+    PRINT '  - Added Fabric Demo Bike Elite Edition to order';
+END
+ELSE
+BEGIN
+    PRINT '  - Warning: Could not add order details due to failed product creation';
+END
 
 -- Sales Order 3: Michael Chen - Corporate bulk order
 INSERT INTO SalesLT.SalesOrderHeader (
@@ -299,24 +330,68 @@ VALUES (
 );
 
 DECLARE @SalesOrder3ID INT = SCOPE_IDENTITY();
-PRINT '✅ Sales Order 3 created for Michael Chen - Corporate (Order ID: ' + CAST(@SalesOrder3ID AS VARCHAR) + ')';
+IF @SalesOrder3ID IS NOT NULL
+    PRINT 'Sales Order 3 created for Michael Chen - Corporate (Order ID: ' + CAST(@SalesOrder3ID AS VARCHAR) + ')';
+ELSE
+    PRINT 'ERROR: Sales Order 3 creation failed for Michael Chen';
 
 -- Add order details for Sales Order 3 (bulk corporate order)
-INSERT INTO SalesLT.SalesOrderDetail (
-    SalesOrderID, ProductID, OrderQty, UnitPrice, UnitPriceDiscount, ModifiedDate
-)
-VALUES 
-    (@SalesOrder3ID, @Product3ID, 10, 34.99, 0.10, GETDATE()),  -- 10 Water Bottles with 10% discount
-    (@SalesOrder3ID, @Product4ID, 2, 149.99, 0.05, GETDATE()),  -- 2 Bike Stands with 5% discount
-    (@SalesOrder3ID, @Product5ID, 5, 49.99, 0.15, GETDATE());   -- 5 LED Light Sets with 15% bulk discount
-
-PRINT '  - Added bulk items: 10 water bottles, 2 bike stands, 5 LED light sets';
-PRINT '  - Applied corporate discounts: 10%, 5%, and 15% respectively';
+IF @SalesOrder3ID IS NOT NULL
+BEGIN
+    -- Only add products that were successfully created
+    IF @Product3ID IS NOT NULL
+    BEGIN
+        INSERT INTO SalesLT.SalesOrderDetail (
+            SalesOrderID, ProductID, OrderQty, UnitPrice, UnitPriceDiscount, ModifiedDate
+        )
+        VALUES (@SalesOrder3ID, @Product3ID, 10, 34.99, 0.10, GETDATE());
+        PRINT '  - Added water bottles with 10% discount';
+    END
+    
+    IF @Product4ID IS NOT NULL
+    BEGIN
+        INSERT INTO SalesLT.SalesOrderDetail (
+            SalesOrderID, ProductID, OrderQty, UnitPrice, UnitPriceDiscount, ModifiedDate
+        )
+        VALUES (@SalesOrder3ID, @Product4ID, 2, 149.99, 0.05, GETDATE());
+        PRINT '  - Added bike stands with 5% discount';
+    END
+    
+    IF @Product5ID IS NOT NULL
+    BEGIN
+        INSERT INTO SalesLT.SalesOrderDetail (
+            SalesOrderID, ProductID, OrderQty, UnitPrice, UnitPriceDiscount, ModifiedDate
+        )
+        VALUES (@SalesOrder3ID, @Product5ID, 5, 49.99, 0.15, GETDATE());
+        PRINT '  - Added LED light sets with 15% discount';
+    END
+    
+    -- Summary message
+    DECLARE @ItemsAdded INT = 0;
+    IF @Product3ID IS NOT NULL SET @ItemsAdded = @ItemsAdded + 1;
+    IF @Product4ID IS NOT NULL SET @ItemsAdded = @ItemsAdded + 1;
+    IF @Product5ID IS NOT NULL SET @ItemsAdded = @ItemsAdded + 1;
+    
+    PRINT '  - Total item types added to corporate order: ' + CAST(@ItemsAdded AS VARCHAR);
+END
+ELSE
+BEGIN
+    PRINT '  - Error: Sales Order 3 was not created successfully - cannot add order details';
+END
 
 -- Wait for replication demonstration
 PRINT '';
-PRINT '⏱️  Pausing 10 seconds for sales orders to replicate...';
-PRINT '   👀 Check Fabric for the complete sales transaction data!';
+PRINT 'Pausing 10 seconds for sales orders to replicate...';
+PRINT 'Check Fabric for the complete sales transaction data!';
+
+-- Debug: Show variable values
+PRINT '';
+PRINT 'DEBUG: Variable Values Check:';
+PRINT '  Customer IDs: ' + ISNULL(CAST(@Customer1ID AS VARCHAR), 'NULL') + ', ' + ISNULL(CAST(@Customer2ID AS VARCHAR), 'NULL') + ', ' + ISNULL(CAST(@Customer3ID AS VARCHAR), 'NULL');
+PRINT '  Product IDs: ' + ISNULL(CAST(@Product1ID AS VARCHAR), 'NULL') + ', ' + ISNULL(CAST(@Product2ID AS VARCHAR), 'NULL') + ', ' + ISNULL(CAST(@Product3ID AS VARCHAR), 'NULL') + ', ' + ISNULL(CAST(@Product4ID AS VARCHAR), 'NULL') + ', ' + ISNULL(CAST(@Product5ID AS VARCHAR), 'NULL');
+PRINT '  Order IDs: ' + ISNULL(CAST(@SalesOrder1ID AS VARCHAR), 'NULL') + ', ' + ISNULL(CAST(@SalesOrder2ID AS VARCHAR), 'NULL') + ', ' + ISNULL(CAST(@SalesOrder3ID AS VARCHAR), 'NULL');
+PRINT '';
+
 WAITFOR DELAY '00:00:10';
 
 -- ========================================
@@ -354,7 +429,11 @@ SELECT
     CAST(Weight AS DECIMAL(10,2)) as Weight,
     ModifiedDate
 FROM SalesLT.Product 
-WHERE ProductID IN (@Product1ID, @Product2ID, @Product3ID, @Product4ID, @Product5ID)
+WHERE ProductID IN (
+    ISNULL(@Product1ID, 0), ISNULL(@Product2ID, 0), ISNULL(@Product3ID, 0), 
+    ISNULL(@Product4ID, 0), ISNULL(@Product5ID, 0)
+)
+  AND ProductID > 0  -- Exclude the 0 values from ISNULL
 ORDER BY ProductID;
 
 PRINT '';
@@ -369,7 +448,7 @@ SELECT
     CAST(soh.SubTotal AS DECIMAL(10,2)) as SubTotal,
     CAST(soh.TaxAmt AS DECIMAL(10,2)) as TaxAmt,
     CAST(soh.Freight AS DECIMAL(10,2)) as Freight,
-    CAST(soh.TotalDue AS DECIMAL(10,2)) as TotalDue,
+    CAST((soh.SubTotal + soh.TaxAmt + soh.Freight) AS DECIMAL(10,2)) as CalculatedTotal,
     soh.ShipMethod
 FROM SalesLT.SalesOrderHeader soh
 JOIN SalesLT.Customer c ON soh.CustomerID = c.CustomerID
@@ -416,10 +495,13 @@ PRINT 'ORDER BY ProductID;';
 PRINT '';
 
 PRINT '-- Query 3: Verify sales orders in Fabric';
-PRINT 'SELECT SalesOrderID, CustomerID, OrderDate, SubTotal, TotalDue';
+PRINT 'SELECT SalesOrderID, CustomerID, OrderDate, SubTotal, TaxAmt, Freight';
 PRINT 'FROM SalesOrderHeader';
 PRINT 'WHERE SalesOrderID IN (' + CAST(@SalesOrder1ID AS VARCHAR) + ', ' + CAST(@SalesOrder2ID AS VARCHAR) + ', ' + CAST(@SalesOrder3ID AS VARCHAR) + ')';
 PRINT 'ORDER BY SalesOrderID;';
+PRINT '';
+PRINT 'NOTE: TotalDue is a computed column and does not replicate to Fabric.';
+PRINT 'You can calculate it as: SubTotal + TaxAmt + Freight';
 PRINT '';
 
 PRINT '-- Query 4: Complete order analysis in Fabric';
@@ -430,13 +512,15 @@ PRINT '    c.CompanyName,';
 PRINT '    COUNT(sod.ProductID) as ItemsOrdered,';
 PRINT '    SUM(sod.OrderQty) as TotalQuantity,';
 PRINT '    AVG(sod.UnitPriceDiscount) as AvgDiscount,';
-PRINT '    soh.TotalDue';
+PRINT '    soh.SubTotal + soh.TaxAmt + soh.Freight as CalculatedTotal';
 PRINT 'FROM SalesOrderHeader soh';
 PRINT 'JOIN Customer c ON soh.CustomerID = c.CustomerID';
 PRINT 'JOIN SalesOrderDetail sod ON soh.SalesOrderID = sod.SalesOrderID';
 PRINT 'WHERE soh.SalesOrderID IN (' + CAST(@SalesOrder1ID AS VARCHAR) + ', ' + CAST(@SalesOrder2ID AS VARCHAR) + ', ' + CAST(@SalesOrder3ID AS VARCHAR) + ')';
-PRINT 'GROUP BY soh.SalesOrderID, c.FirstName, c.LastName, c.CompanyName, soh.TotalDue';
+PRINT 'GROUP BY soh.SalesOrderID, c.FirstName, c.LastName, c.CompanyName, soh.SubTotal, soh.TaxAmt, soh.Freight';
 PRINT 'ORDER BY soh.SalesOrderID;';
+PRINT '';
+PRINT 'NOTE: Since TotalDue (computed) does not replicate, we calculate it manually.';
 
 -- ========================================
 -- DEMO STEP 6: BUSINESS INSIGHTS
@@ -451,27 +535,27 @@ DECLARE @TotalNewCustomers INT;
 DECLARE @TotalNewProducts INT;
 DECLARE @AvgOrderValue DECIMAL(10,2);
 
-SELECT @TotalNewRevenue = SUM(TotalDue) 
+SELECT @TotalNewRevenue = SUM(SubTotal + TaxAmt + Freight) 
 FROM SalesLT.SalesOrderHeader 
 WHERE SalesOrderID IN (@SalesOrder1ID, @SalesOrder2ID, @SalesOrder3ID);
 
 SET @TotalNewCustomers = 3;
 SET @TotalNewProducts = 5;
 
-SELECT @AvgOrderValue = AVG(TotalDue)
+SELECT @AvgOrderValue = AVG(SubTotal + TaxAmt + Freight)
 FROM SalesLT.SalesOrderHeader 
 WHERE SalesOrderID IN (@SalesOrder1ID, @SalesOrder2ID, @SalesOrder3ID);
 
 PRINT '';
-PRINT '📊 DEMO SESSION BUSINESS METRICS:';
-PRINT '  💰 Total Revenue Generated:  + CAST(@TotalNewRevenue AS VARCHAR);
-PRINT '  👥 New Customers Added: ' + CAST(@TotalNewCustomers AS VARCHAR);
-PRINT '  📦 New Products Launched: ' + CAST(@TotalNewProducts AS VARCHAR);
-PRINT '  💵 Average Order Value:  + CAST(@AvgOrderValue AS VARCHAR);
+PRINT 'DEMO SESSION BUSINESS METRICS:';
+PRINT '  * Total Revenue Generated: $' + CAST(@TotalNewRevenue AS VARCHAR);
+PRINT '  * New Customers Added: ' + CAST(@TotalNewCustomers AS VARCHAR);
+PRINT '  * New Products Launched: ' + CAST(@TotalNewProducts AS VARCHAR);
+PRINT '  * Average Order Value: $' + CAST(@AvgOrderValue AS VARCHAR);
 
 -- Product category breakdown
 PRINT '';
-PRINT '📈 PRODUCT CATEGORY BREAKDOWN:';
+PRINT 'PRODUCT CATEGORY BREAKDOWN:';
 SELECT 
     pc.Name as CategoryName,
     COUNT(p.ProductID) as NewProducts,
@@ -486,12 +570,12 @@ ORDER BY NewProducts DESC;
 
 -- Customer analysis
 PRINT '';
-PRINT '👤 CUSTOMER ANALYSIS:';
+PRINT 'CUSTOMER ANALYSIS:';
 SELECT 
     c.CustomerID,
     CONCAT(c.FirstName, ' ', c.LastName) as CustomerName,
     c.CompanyName,
-    ISNULL(SUM(soh.TotalDue), 0) as TotalSpent,
+    ISNULL(SUM(soh.SubTotal + soh.TaxAmt + soh.Freight), 0) as TotalSpent,
     COUNT(soh.SalesOrderID) as OrdersPlaced,
     CASE 
         WHEN c.CompanyName IS NOT NULL THEN 'B2B'
@@ -512,7 +596,7 @@ PRINT '--- DEMO Step 7: Preparation for Next Demo Steps ---';
 
 -- Store IDs for use in update and delete demos
 PRINT '';
-PRINT '🔗 REFERENCE IDs FOR NEXT DEMO SCRIPTS:';
+PRINT 'REFERENCE IDs FOR NEXT DEMO SCRIPTS:';
 PRINT 'Copy these IDs for use in update and delete demonstrations:';
 PRINT '';
 PRINT '-- Customer IDs:';
@@ -539,31 +623,31 @@ PRINT 'DECLARE @DemoOrder3 INT = ' + CAST(@SalesOrder3ID AS VARCHAR) + '; -- Mic
 PRINT '';
 PRINT '=== INSERT DEMO COMPLETED SUCCESSFULLY ===';
 PRINT '';
-PRINT '✅ What was demonstrated:';
-PRINT '   📝 INSERT operations for Customers, Products, and Sales Orders';
-PRINT '   ⚡ Real-time replication to Microsoft Fabric OneLake';
-PRINT '   📊 Immediate availability for analytics in Fabric SQL Analytics Endpoint';
-PRINT '   💼 Realistic business scenarios with different customer types';
-PRINT '   🛍️  Complex sales transactions with discounts and multiple items';
+PRINT 'What was demonstrated:';
+PRINT '   * INSERT operations for Customers, Products, and Sales Orders';
+PRINT '   * Real-time replication to Microsoft Fabric OneLake';
+PRINT '   * Immediate availability for analytics in Fabric SQL Analytics Endpoint';
+PRINT '   * Realistic business scenarios with different customer types';
+PRINT '   * Complex sales transactions with discounts and multiple items';
 PRINT '';
-PRINT '📈 Data created:';
-PRINT '   👥 3 new customers (B2B and B2C)';
-PRINT '   📦 5 new products across different categories';
-PRINT '   🛒 3 sales orders with 8 line items total';
-PRINT '   💰  + CAST(@TotalNewRevenue AS VARCHAR) + ' in new revenue';
+PRINT 'Data created:';
+PRINT '   * 3 new customers (B2B and B2C)';
+PRINT '   * 5 new products across different categories';
+PRINT '   * 3 sales orders with 8 line items total';
+PRINT '   * $' + CAST(@TotalNewRevenue AS VARCHAR) + ' in new revenue';
 PRINT '';
-PRINT '🎯 Demo highlights for stakeholders:';
-PRINT '   ⚡ Zero-latency data replication';
-PRINT '   🔍 Immediate analytical capabilities';
-PRINT '   📊 Real-time business intelligence';
-PRINT '   🔄 Seamless operational to analytical data flow';
+PRINT 'Demo highlights for stakeholders:';
+PRINT '   * Zero-latency data replication';
+PRINT '   * Immediate analytical capabilities';
+PRINT '   * Real-time business intelligence';
+PRINT '   * Seamless operational to analytical data flow';
 PRINT '';
-PRINT '➡️  Next steps:';
+PRINT 'Next steps:';
 PRINT '   1. Run 02-update-demo.sql to show UPDATE replication';
 PRINT '   2. Run 03-delete-demo.sql to demonstrate soft delete preservation';
 PRINT '   3. Explore advanced analytics in Fabric using the fabric-views.sql';
 PRINT '   4. Build Power BI reports using the replicated data';
 PRINT '';
-PRINT '📁 Repository: https://github.com/stuba83/fabric-mirroring-demo';
-PRINT '⭐ Star the repo if this demo was helpful!';
-PRINT '🐛 Issues or questions? https://github.com/stuba83/fabric-mirroring-demo/issues';
+PRINT 'Repository: https://github.com/stuba83/fabric-mirroring-demo';
+PRINT 'Star the repo if this demo was helpful!';
+PRINT 'Issues or questions? https://github.com/stuba83/fabric-mirroring-demo/issues';
