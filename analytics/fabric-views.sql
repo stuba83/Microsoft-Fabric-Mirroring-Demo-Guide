@@ -244,6 +244,7 @@ LEFT JOIN Product p ON pc.ProductCategoryID = p.ProductCategoryID
 LEFT JOIN SalesOrderDetail sod ON p.ProductID = sod.ProductID
 LEFT JOIN SalesOrderHeader soh ON sod.SalesOrderID = soh.SalesOrderID AND soh.IsDeleted = 0
 GROUP BY pc.ProductCategoryID, pc.Name;
+GO
 
 -- ========================================
 -- SALES ANALYTICS VIEWS
@@ -286,6 +287,7 @@ WHERE soh.IsDeleted = 0
   AND soh.OrderDate IS NOT NULL
 GROUP BY YEAR(soh.OrderDate), MONTH(soh.OrderDate)
 HAVING COUNT(soh.SalesOrderID) > 0;
+GO
 
 -- Order Analysis View
 CREATE VIEW OrderAnalysis AS
@@ -356,6 +358,7 @@ GROUP BY
     soh.SalesOrderID, soh.CustomerID, c.FirstName, c.LastName, c.CompanyName,
     soh.OrderDate, soh.DueDate, soh.ShipDate, soh.Status, soh.IsDeleted,
     soh.SubTotal, soh.TaxAmt, soh.Freight, soh.TotalDue;
+GO
 
 -- ========================================
 -- ADVANCED ANALYTICS VIEWS
@@ -401,6 +404,7 @@ SELECT
 FROM CohortSizes cs
 JOIN CustomerCohorts cc ON cs.CohortMonth = cc.CohortMonth
 GROUP BY cs.CohortMonth, cs.CohortSize, cs.CohortRevenue;
+GO
 
 -- RFM Analysis View (Recency, Frequency, Monetary)
 CREATE VIEW RFMAnalysis AS
@@ -472,6 +476,7 @@ SELECT
     END as CustomerSegment
 
 FROM RFMScores;
+GO
 
 -- ========================================
 -- OPERATIONAL VIEWS
@@ -538,6 +543,7 @@ SELECT
 FROM Customer c
 FULL OUTER JOIN SalesOrderHeader soh ON c.CustomerID = soh.CustomerID
 FULL OUTER JOIN Product p ON 1=1;  -- Cross join for totals
+GO
 
 -- ========================================
 -- SUMMARY
@@ -559,6 +565,7 @@ UNION ALL SELECT 'CustomerCohortAnalysis', 'Cohort-based customer retention anal
 UNION ALL SELECT 'RFMAnalysis', 'RFM segmentation for targeted marketing', 'Customer Segmentation, Marketing Campaigns, Personalization'
 UNION ALL SELECT 'DataQualityDashboard', 'Data quality monitoring across all tables', 'Data Governance, Quality Assurance, Data Management'
 UNION ALL SELECT 'BusinessKPIDashboard', 'Key business performance indicators', 'Executive Dashboards, Performance Monitoring, Strategic Planning';
+GO
 
 -- ========================================
 -- USAGE INSTRUCTIONS
